@@ -9,6 +9,7 @@ Usage: crt [options...] <domain name>
 
 Options:
   -o <path> Output file path. Write to file instead of stdout.
+  -e        Exclude expired certificates.
   -l <int>  Limit the number of results. (default: 1000) 
   -json     Turn results to JSON.
   -csv      Turn results to CSV.

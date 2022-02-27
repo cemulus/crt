@@ -31,6 +31,7 @@ const (
 			FROM certificate_and_identities cai
 			WHERE plainto_tsquery('certwatch', '%s') @@ identities(cai.CERTIFICATE)
 				AND cai.NAME_VALUE ILIKE ('%%' || '%s' || '%%')
+				%s --filter
 			LIMIT 10000
 		) sub
 	GROUP BY sub.CERTIFICATE
@@ -54,6 +55,9 @@ FROM ci
 WHERE ci.ISSUER_CA_ID = ca.ID
 ORDER BY le.ENTRY_TIMESTAMP DESC NULLS LAST
 LIMIT %d`
+
+	excludeExpired = `AND coalesce(x509_notAfter(cai.CERTIFICATE), 'infinity'::timestamp) >= date_trunc('year', now() AT TIME ZONE 'UTC')
+    AND x509_notAfter(cai.CERTIFICATE) >= now() AT TIME ZONE 'UTC'`
 )
 
 type Repository struct {
@@ -69,8 +73,14 @@ func New() (*Repository, error) {
 	return &Repository{db}, nil
 }
 
-func (r *Repository) GetCertLogs(domain string, limit int) (result.CertResult, error) {
-	stmt := fmt.Sprintf(statement, domain, domain, limit)
+func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result.CertResult, error) {
+	filter := ""
+
+	if expired {
+		filter = excludeExpired
+	}
+
+	stmt := fmt.Sprintf(statement, domain, domain, filter, limit)
 
 	rows, err := r.db.Query(stmt)
 	if err != nil {

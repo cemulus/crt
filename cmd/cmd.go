@@ -12,6 +12,7 @@ import (
 
 var (
 	filename = flag.String("o", "", "")
+	expired  = flag.Bool("e", false, "")
 	limit    = flag.Int("l", 1000, "")
 	jsonOut  = flag.Bool("json", false, "")
 	csvOut   = flag.Bool("csv", false, "")
@@ -21,6 +22,7 @@ var usage = `Usage: crt [options...] <domain name>
 
 Options:
   -o <path> Output file path. Write to file instead of stdout.
+  -e        Exclude expired certificates.
   -l <int>  Limit the number of results. (default: 1000) 
   -json     Turn results to JSON.
   -csv      Turn results to CSV.
@@ -55,7 +57,7 @@ func Execute() {
 
 	var res result.CertResult
 
-	res, err = repo.GetCertLogs(domain, *limit)
+	res, err = repo.GetCertLogs(domain, *expired, *limit)
 	if err != nil {
 		log.Fatal(err)
 	}
