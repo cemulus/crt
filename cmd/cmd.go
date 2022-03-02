@@ -11,17 +11,19 @@ import (
 )
 
 var (
-	filename = flag.String("o", "", "")
-	expired  = flag.Bool("e", false, "")
-	limit    = flag.Int("l", 1000, "")
-	jsonOut  = flag.Bool("json", false, "")
-	csvOut   = flag.Bool("csv", false, "")
+	filename  = flag.String("o", "", "")
+	subdomain = flag.Bool("s", false, "")
+	expired   = flag.Bool("e", false, "")
+	limit     = flag.Int("l", 1000, "")
+	jsonOut   = flag.Bool("json", false, "")
+	csvOut    = flag.Bool("csv", false, "")
 )
 
 var usage = `Usage: crt [options...] <domain name>
 
 Options:
   -o <path> Output file path. Write to file instead of stdout.
+  -s        Enumerate subdomains.
   -e        Exclude expired certificates.
   -l <int>  Limit the number of results. (default: 1000) 
   -json     Turn results to JSON.
@@ -29,6 +31,7 @@ Options:
 
 Examples:
   crt example.com
+  crt -s -e example.com
   crt -o logs.json -json example.com
   crt -csv -o logs.csv -l 15 example.com
 `
@@ -55,9 +58,13 @@ func Execute() {
 	}
 	defer repo.Close()
 
-	var res result.CertResult
+	var res result.QueryResult
 
-	res, err = repo.GetCertLogs(domain, *expired, *limit)
+	if *subdomain {
+		res, err = repo.GetSubdomains(domain, *expired, *limit)
+	} else {
+		res, err = repo.GetCertLogs(domain, *expired, *limit)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}

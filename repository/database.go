@@ -4,9 +4,9 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
-
 	"github.com/cemulus/crt/result"
+
+	_ "github.com/lib/pq"
 )
 
 var (
@@ -16,48 +16,6 @@ var (
 	user   = "guest"
 	dbname = "certwatch"
 	login  = fmt.Sprintf("host=%s port=%d user=%s dbname=%s", host, port, user, dbname)
-)
-
-const (
-	statement = `WITH ci AS (
-	SELECT min(sub.CERTIFICATE_ID) ID,
-		min(sub.ISSUER_CA_ID) ISSUER_CA_ID,
-		array_agg(DISTINCT sub.NAME_VALUE) NAME_VALUES,
-		x509_commonName(sub.CERTIFICATE) COMMON_NAME,
-		x509_notBefore(sub.CERTIFICATE) NOT_BEFORE,
-		x509_notAfter(sub.CERTIFICATE) NOT_AFTER,
-		encode(x509_serialNumber(sub.CERTIFICATE), 'hex') SERIAL_NUMBER
-	FROM (SELECT *
-			FROM certificate_and_identities cai
-			WHERE plainto_tsquery('certwatch', '%s') @@ identities(cai.CERTIFICATE)
-				AND cai.NAME_VALUE ILIKE ('%%' || '%s' || '%%')
-				%s --filter
-			LIMIT 10000
-		) sub
-	GROUP BY sub.CERTIFICATE
-)
-SELECT ci.ISSUER_CA_ID,
-	ca.NAME ISSUER_NAME,
-	ci.COMMON_NAME,
-	array_to_string(ci.NAME_VALUES, chr(10)) NAME_VALUE,
-	ci.ID ID,
-	le.ENTRY_TIMESTAMP,
-	ci.NOT_BEFORE,
-	ci.NOT_AFTER,
-	ci.SERIAL_NUMBER
-FROM ci
-	LEFT JOIN LATERAL (
-		SELECT min(ctle.ENTRY_TIMESTAMP) ENTRY_TIMESTAMP
-		FROM ct_log_entry ctle
-		WHERE ctle.CERTIFICATE_ID = ci.ID
-	) le ON TRUE,
-	ca
-WHERE ci.ISSUER_CA_ID = ca.ID
-ORDER BY le.ENTRY_TIMESTAMP DESC NULLS LAST
-LIMIT %d`
-
-	excludeExpired = `AND coalesce(x509_notAfter(cai.CERTIFICATE), 'infinity'::timestamp) >= date_trunc('year', now() AT TIME ZONE 'UTC')
-    AND x509_notAfter(cai.CERTIFICATE) >= now() AT TIME ZONE 'UTC'`
 )
 
 type Repository struct {
@@ -77,10 +35,10 @@ func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result
 	filter := ""
 
 	if expired {
-		filter = excludeExpired
+		filter = excludeExpiredFilter
 	}
 
-	stmt := fmt.Sprintf(statement, domain, domain, filter, limit)
+	stmt := fmt.Sprintf(certLogScript, domain, domain, filter, limit)
 
 	rows, err := r.db.Query(stmt)
 	if err != nil {
@@ -124,6 +82,35 @@ func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result
 			SerialNumber:   serialNumber.String}
 
 		res = append(res, certificate)
+	}
+
+	return res, nil
+}
+
+func (r *Repository) GetSubdomains(domain string, expired bool, limit int) (result.SubdomainResult, error) {
+	filter := ""
+
+	if expired {
+		filter = excludeExpiredFilter
+	}
+
+	stmt := fmt.Sprintf(subdomainScript, domain, domain, filter, limit)
+
+	rows, err := r.db.Query(stmt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query row: %s", err)
+	}
+	defer rows.Close()
+
+	var res result.SubdomainResult
+	var subdmn sql.NullString
+
+	for rows.Next() {
+		if err = rows.Scan(&subdmn); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %s", err)
+		}
+
+		res = append(res, result.Subdomain{Name: subdmn.String})
 	}
 
 	return res, nil
