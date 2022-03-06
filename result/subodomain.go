@@ -15,7 +15,7 @@ type Subdomain struct {
 
 type SubdomainResult []Subdomain
 
-func (s SubdomainResult) Table() string {
+func (s SubdomainResult) Table() []byte {
 	res := new(bytes.Buffer)
 	table := tablewriter.NewWriter(res)
 
@@ -32,34 +32,34 @@ func (s SubdomainResult) Table() string {
 	table.SetRowSeparator("—")
 	table.Render()
 
-	return res.String()
+	return res.Bytes()
 }
 
-func (s SubdomainResult) JSON() (string, error) {
+func (s SubdomainResult) JSON() ([]byte, error) {
 	res, err := json.MarshalIndent(s, "", "\t")
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal results: %s", err)
+		return nil, fmt.Errorf("failed to marshal results: %s", err)
 	}
 
-	return string(res), nil
+	return res, nil
 }
 
-func (s SubdomainResult) CSV() (string, error) {
+func (s SubdomainResult) CSV() ([]byte, error) {
 	res := new(bytes.Buffer)
 	w := csv.NewWriter(res)
 
 	if err := w.Write([]string{"subdomain"}); err != nil {
-		return "", fmt.Errorf("failed to write CSV headers: %s", err)
+		return nil, fmt.Errorf("failed to write CSV headers: %s", err)
 	}
 
 	for _, sub := range s {
 		if err := w.Write([]string{sub.Name}); err != nil {
-			return "", fmt.Errorf("failed to write CSV content: %s", err)
+			return nil, fmt.Errorf("failed to write CSV content: %s", err)
 		}
 	}
 	w.Flush()
 
-	return res.String(), nil
+	return res.Bytes(), nil
 }
 
 func (s SubdomainResult) Size() int { return len(s) }

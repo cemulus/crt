@@ -26,7 +26,7 @@ type Certificate struct {
 
 type CertResult []Certificate
 
-func (r CertResult) Table() string {
+func (r CertResult) Table() []byte {
 	res := new(bytes.Buffer)
 	table := tablewriter.NewWriter(res)
 
@@ -56,19 +56,19 @@ func (r CertResult) Table() string {
 	table.SetRowSeparator("—")
 	table.Render()
 
-	return res.String()
+	return res.Bytes()
 }
 
-func (r CertResult) JSON() (string, error) {
+func (r CertResult) JSON() ([]byte, error) {
 	res, err := json.MarshalIndent(r, "", "\t")
 	if err != nil {
-		return "", fmt.Errorf("failed to marshal results: %s", err)
+		return nil, fmt.Errorf("failed to marshal results: %s", err)
 	}
 
-	return string(res), nil
+	return res, nil
 }
 
-func (r CertResult) CSV() (string, error) {
+func (r CertResult) CSV() ([]byte, error) {
 	res := new(bytes.Buffer)
 	w := csv.NewWriter(res)
 
@@ -77,7 +77,7 @@ func (r CertResult) CSV() (string, error) {
 		"entry_timestamp", "not_before", "not_after", "serial_number",
 	})
 	if err != nil {
-		return "", fmt.Errorf("failed to write CSV headers: %s", err)
+		return nil, fmt.Errorf("failed to write CSV headers: %s", err)
 	}
 
 	for _, v := range r {
@@ -92,12 +92,12 @@ func (r CertResult) CSV() (string, error) {
 			v.NotAfter.String(),
 			v.SerialNumber})
 		if err != nil {
-			return "", fmt.Errorf("failed to write CSV content: %s", err)
+			return nil, fmt.Errorf("failed to write CSV content: %s", err)
 		}
 	}
 	w.Flush()
 
-	return res.String(), nil
+	return res.Bytes(), nil
 }
 
 func (r CertResult) Size() int { return len(r) }

@@ -74,7 +74,7 @@ func Execute() {
 		os.Exit(0)
 	}
 
-	var out string
+	var out []byte
 
 	if *jsonOut {
 		out, err = res.JSON()
@@ -89,7 +89,7 @@ func Execute() {
 	}
 
 	if *filename == "" {
-		fmt.Println(out)
+		fmt.Print(string(out))
 		os.Exit(0)
 	}
 
@@ -99,7 +99,7 @@ func Execute() {
 	}
 	defer file.Close()
 
-	if _, err = file.Write([]byte(out)); err != nil {
+	if _, err = file.Write(out); err != nil {
 		log.Fatal("failed to write to file:", err)
 	}
 }

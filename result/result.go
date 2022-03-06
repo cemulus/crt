@@ -1,8 +1,8 @@
 package result
 
 type QueryResult interface {
-	Table() string
-	JSON() (string, error)
-	CSV() (string, error)
+	Table() []byte
+	JSON() ([]byte, error)
+	CSV() ([]byte, error)
 	Size() int
 }
