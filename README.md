@@ -5,6 +5,10 @@ It can also enumerate subdomains.
 
 ## Installation
 
+### From binary
+Check the [release page](https://github.com/cemulus/crt/releases/latest) for the executables.
+
+### From source
 If you have Go installed:
 
 ```bash
