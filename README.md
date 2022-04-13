@@ -12,7 +12,7 @@ Check the [release page](https://github.com/cemulus/crt/releases/latest) for the
 If you have Go installed:
 
 ```bash
-  go get -u github.com/cemulus/crt
+  go install github.com/cemulus/crt@latest
 ```
     
 ## Usage
