@@ -31,7 +31,7 @@ func New() (*Repository, error) {
 	return &Repository{db}, nil
 }
 
-func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result.CertResult, error) {
+func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result.Certificates, error) {
 	filter := ""
 
 	if expired {
@@ -46,7 +46,7 @@ func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result
 	}
 	defer rows.Close()
 
-	var res result.CertResult
+	var res result.Certificates
 
 	var (
 		issuerCaID                                      sql.NullInt32
@@ -87,7 +87,7 @@ func (r *Repository) GetCertLogs(domain string, expired bool, limit int) (result
 	return res, nil
 }
 
-func (r *Repository) GetSubdomains(domain string, expired bool, limit int) (result.SubdomainResult, error) {
+func (r *Repository) GetSubdomains(domain string, expired bool, limit int) (result.Subdomains, error) {
 	filter := ""
 
 	if expired {
@@ -102,7 +102,7 @@ func (r *Repository) GetSubdomains(domain string, expired bool, limit int) (resu
 	}
 	defer rows.Close()
 
-	var res result.SubdomainResult
+	var res result.Subdomains
 	var subdmn sql.NullString
 
 	for rows.Next() {

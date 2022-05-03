@@ -58,7 +58,7 @@ func Execute() {
 	}
 	defer repo.Close()
 
-	var res result.QueryResult
+	var res result.Printer
 
 	if *subdomain {
 		res, err = repo.GetSubdomains(domain, *expired, *limit)

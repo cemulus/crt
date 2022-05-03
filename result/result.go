@@ -1,6 +1,6 @@
 package result
 
-type QueryResult interface {
+type Printer interface {
 	Table() []byte
 	JSON() ([]byte, error)
 	CSV() ([]byte, error)

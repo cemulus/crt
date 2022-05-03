@@ -13,9 +13,9 @@ type Subdomain struct {
 	Name string `json:"subdomain"`
 }
 
-type SubdomainResult []Subdomain
+type Subdomains []Subdomain
 
-func (s SubdomainResult) Table() []byte {
+func (s Subdomains) Table() []byte {
 	res := new(bytes.Buffer)
 	table := tablewriter.NewWriter(res)
 
@@ -35,7 +35,7 @@ func (s SubdomainResult) Table() []byte {
 	return res.Bytes()
 }
 
-func (s SubdomainResult) JSON() ([]byte, error) {
+func (s Subdomains) JSON() ([]byte, error) {
 	res, err := json.MarshalIndent(s, "", "\t")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal results: %s", err)
@@ -44,7 +44,7 @@ func (s SubdomainResult) JSON() ([]byte, error) {
 	return res, nil
 }
 
-func (s SubdomainResult) CSV() ([]byte, error) {
+func (s Subdomains) CSV() ([]byte, error) {
 	res := new(bytes.Buffer)
 	w := csv.NewWriter(res)
 
@@ -62,4 +62,4 @@ func (s SubdomainResult) CSV() ([]byte, error) {
 	return res.Bytes(), nil
 }
 
-func (s SubdomainResult) Size() int { return len(s) }
+func (s Subdomains) Size() int { return len(s) }

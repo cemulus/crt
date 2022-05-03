@@ -24,9 +24,9 @@ type Certificate struct {
 	SerialNumber   string    `json:"serial_number"`
 }
 
-type CertResult []Certificate
+type Certificates []Certificate
 
-func (r CertResult) Table() []byte {
+func (r Certificates) Table() []byte {
 	res := new(bytes.Buffer)
 	table := tablewriter.NewWriter(res)
 
@@ -59,7 +59,7 @@ func (r CertResult) Table() []byte {
 	return res.Bytes()
 }
 
-func (r CertResult) JSON() ([]byte, error) {
+func (r Certificates) JSON() ([]byte, error) {
 	res, err := json.MarshalIndent(r, "", "\t")
 	if err != nil {
 		return nil, fmt.Errorf("failed to marshal results: %s", err)
@@ -68,7 +68,7 @@ func (r CertResult) JSON() ([]byte, error) {
 	return res, nil
 }
 
-func (r CertResult) CSV() ([]byte, error) {
+func (r Certificates) CSV() ([]byte, error) {
 	res := new(bytes.Buffer)
 	w := csv.NewWriter(res)
 
@@ -100,4 +100,4 @@ func (r CertResult) CSV() ([]byte, error) {
 	return res.Bytes(), nil
 }
 
-func (r CertResult) Size() int { return len(r) }
+func (r Certificates) Size() int { return len(r) }
