@@ -1,29 +1,31 @@
 # crt
 
-**crt** is a CLI tool to get [Certificate Transparency](https://en.wikipedia.org/wiki/Certificate_Transparency) logs of a domain name.
+**crt** is a CLI tool to check [Certificate Transparency](https://en.wikipedia.org/wiki/Certificate_Transparency) logs of a domain name.
 It can also enumerate subdomains.
 
 ## Installation
 
 ### From binary
+
 Check the [release page](https://github.com/cemulus/crt/releases/latest) for the executables.
 
 ### From source
+
 If you have Go installed:
 
 ```bash
-  go install github.com/cemulus/crt@latest
+go install github.com/cemulus/crt@latest
 ```
-    
+
 ## Usage
 
-```
+```bash
 Usage: crt [options...] <domain name>
 
 Options:
   -s        Enumerate subdomains.
   -e        Exclude expired certificates.
-  -l <int>  Limit the number of results. (default: 1000) 
+  -l <int>  Limit the number of results. (default: 1000)
   -o <path> Output file path. Write to file instead of stdout.
   -json     Turn results to JSON.
   -csv      Turn results to CSV.
@@ -37,9 +39,9 @@ Examples:
 
 ## Examples
 
-![crt kernel.org](https://i.ibb.co/DtFzf3P/crt-0.png)
+![crt kernel.org](docs/log.png)
 
-![crt -s kernel.org](https://i.ibb.co/2SNRZKP/crt-1.png)
+![crt -s kernel.org](docs/subdomain.png)
 
 ## License
 
